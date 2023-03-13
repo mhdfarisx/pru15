@@ -12,7 +12,7 @@ function map() {
 
     Promise.all([
         d3.json('malaysia_parlimen.geojson'),
-        d3.csv('clean_resultPru15.csv')
+        d3.csv('clean_resultPru15_latest.csv')
 
     ]).then(data => {
 
