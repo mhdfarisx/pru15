@@ -11,7 +11,7 @@ function map() {
     }).addTo(mymap);
 
     Promise.all([
-        d3.json('malaysia.parlimen.geojson'),
+        d3.json('malaysia_parlimen.geojson'),
         d3.csv('clean_resultPru15.csv')
 
     ]).then(data => {
