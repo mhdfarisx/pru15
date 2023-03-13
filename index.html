@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="//d3js.org/d3.v7.min.js"></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
+        integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+        crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
+        integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+        crossorigin=""></script>
+
+    <!-- Create an element where the map will take place -->
+
+
+    <script src="map.js"></script>
+    <script src="stacked.js"></script>
+
+    <style>
+        body {
+
+            margin: auto;
+            font-family: futura-pt, sans-serif;
+            background-color: rgb(255, 255, 255);
+
+        }
+
+        .negeri {
+            text-align: center;
+            font-size: 20px;
+        }
+
+        .parlimen {
+            text-align: center;
+            border: 1px solid black;
+            font-size: 15px;
+            background-color: rgb(36, 54, 81);
+            color: white;
+            padding: 10px;
+        }
+
+        h1 {
+            background-image: url("https://w0.peakpx.com/wallpaper/144/299/HD-wallpaper-malaysian-flag-low-poly-art-asian-countries-national-symbols-flag-of-malaysia-3d-flags-malaysia-flag-malaysia-asia-malaysia-3d-flag.jpg");
+            padding: 70px;
+            margin: 0px;
+            font-size: 100px;
+            color: rgb(255, 255, 255);
+            padding-left: 30px;
+            text-shadow: 1px 1px 2px rgb(37, 37, 37), 0 0 25px rgb(253, 138, 6), 0 0 5px rgb(0, 0, 70);
+
+
+        }
+
+        #mapid {
+            height: 400px;
+            width: 60%;
+            margin: 2% 20%;
+            border: 2px solid #252525
+        }
+
+        img {
+            margin: 0px;
+        }
+
+        p {
+            margin: 0;
+            text-align: center;
+            font-weight: bold;
+            font-style: italic;
+            font-size: 14px;
+        }
+
+
+        .container {
+            border: 1px solid black;
+            border-radius: 10px;
+            padding: 10px;
+            color: #333;
+            box-shadow: 0 5px 14px rgb(0 0 0 / 60%);
+            background: rgb(235, 235, 235);
+        }
+
+        .logo {
+            margin: 0;
+            font-style: italic;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .parti {
+            text-align: center;
+            margin-top: 5px;
+            font-style: italic;
+            color: rgb(46, 46, 46);
+            font-weight: bold;
+        }
+
+        .calon {
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .stacked_bar {
+            margin:0px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .all {
+            padding: 0px 20px;
+            border: 2px solid #252525;
+            margin: 10px 40px;
+        }
+
+    </style>
+
+    </style>
+
+</head>
+<html>
+
+<body>
+
+    <h1>
+        PRU15
+        <p style="font-size: 30px; margin: 0px; text-align: left;">Pilihan Raya Umum 15</p>
+    </h1>
+
+    <div id="mapid"></div>
+
+    <div class="stacked_bar"></div>
+    <div id="div_tooltip"></div>
+
+    <div class="all"></div>
+
+    <script>
+
+        map();
+        stacked();
+
+        d3.csv('clean_resultPru15_latest.csv').then(csv => {
+
+            // console.log('data',csv)
+
+            dataset = csv
+            columns = csv.columns
+
+            console.log('dataset', dataset)
+            console.log('columns', columns)
+
+            dataset.forEach((d, i) => {
+
+                for (var i in d) {
+                    if (d[i] == '\\N') {
+                        d[i] = null
+
+                    }
+                }
+
+            })
+
+
+            //createDiv(dataset)
+
+            listNegeri();
+
+        })
+
+
+
+        //====================================================================================
+        //
+        //====================================================================================
+
+        function listNegeri() {
+
+            d3.select('.all')
+                .selectAll('.negeri-container').data(d => {
+
+                    let negeriData = d3.groups(dataset, d => d.negeri)
+                        .map(d => {
+                            return {
+                                negeri: d[0],
+                                values: d[1],
+                                active: d3.some(d[1], d => d.active)
+                            }
+                        });
+
+                    console.log('negeriData', negeriData);
+
+                    return negeriData;
+
+                })
+                .join('div').attr('class', 'negeri-container')
+                // .style('border-top', '1px solid #99999980')
+                .style('border-bottom', '1px solid #99999980')
+                .call(sel => {
+
+
+                    //=====================
+                    //  negeri-label
+                    //=====================
+
+                    sel.selectAll('.negeri-label')
+                        .data(d => [d])
+                        .join('div')
+                        .attr('class', 'negeri-label')
+                        .style('cursor', 'pointer')
+                        .style('display', 'flex')
+
+                        .call(sel => {
+
+                            sel.selectAll('.flag')
+                                .data(d => [d])
+                                .join('img')
+                                .attr('class', 'flag')
+                                .attr('src', d => 'flag/' + d.negeri + '.png') // dynamic call img source
+                                .style('width', '60px')
+                                .style('height', '40px')
+                                .style('border', '2px solid black')
+                                .style('margin', '15px')
+
+                            sel.selectAll('.negeri')
+                                .data(d => [d])
+                                .join('span')
+                                .attr('class', 'negeri')
+                                .html(d => d.negeri)
+                                .style('font-size', '30px;')
+                                // .style('font-weight', 'bold')
+                                // .style('flex','0 0 200px')
+                                .style('padding', '15px')
+                                .style('text-align', 'left')
+
+                        })
+
+                        .on('click', negeriActive)
+
+
+
+                });
+
+        }
+
+
+        let comma = d3.format(',');
+
+
+        //====================================================================================
+        // negeriActive
+        //====================================================================================
+
+        function negeriActive(e, d) {
+
+            console.group('negeriActive');
+            console.log('d', d);
+
+            let active = !d3.select(this).classed('active'); // toggle
+
+            d3.select(this).classed('active', active);
+
+            //=====================
+            //  parlimen-container
+            //=====================
+            d3.select(this.parentNode)
+                .selectAll('.parlimen-container')
+                .data(d => {
+
+                    if (active) {
+
+                        let parlimen = d3.groups(d.values, d => d.parlimen)
+                            .map(d => {
+                                return {
+                                    key: d[0],
+                                    label: d[1].slice(0, 1).map(d => 'P' + d.parid + ' ' + d.parlimen).join(''),
+                                    parti: d[1].filter(d => d.status == 'MENANG').map(d => d.parti).join(''), // remarkable findings
+                                    values: d[1],
+                                    active: d3.some(d[1], d => d.active)
+                                }
+                            })
+                        console.log('parlimen', parlimen);
+
+                        return parlimen;
+
+                    } else {
+                        return [];
+                    }
+
+                })
+                .join('div').attr('class', 'parlimen-container')
+                .style('border-top', '1px solid #cccccc80')
+                .style('padding', '6px')
+                .call(sel => {
+
+                    //=====================
+                    //  parlimen-label
+                    //=====================
+                    sel.selectAll('.parlimen-label').data(d => [d])
+                        .join('div').attr('class', 'parlimen-label')
+                        .style('cursor', 'pointer')
+                        .style('margin-left', '48px')
+                        .style('padding', '6px')
+                        .style('display', 'flex')
+                        .call(sel => {
+                            sel.selectAll('.parti_flag')
+                                .data(d => [d])
+                                .join('img')
+                                .attr('class', 'parti_flag')
+                                .attr('src', d => 'parti_logo/' + d.parti.toLowerCase() + '.png') // dynamic call img source
+                                .style('width', '30px')
+                                .style('height', '20px')
+                                .style('border', '1px solid black')
+
+
+                            sel.selectAll('.parlimen-name')
+                                .data(d => [d])
+                                .join('span')
+                                .attr('class', 'parlimen-name')
+                                .html(d => d.label)
+                                .style('font-size', '25px;')
+                                .style('padding', '0px 0px 0px 15px')
+                                .style('text-align', 'left')
+                        })
+                        .on('click', parlimenActive)
+
+
+                });
+
+            console.groupEnd('negeriActive');
+        }
+
+
+        //====================================================================================
+        // parlimenActive
+        //====================================================================================
+
+        function parlimenActive(e, d) {
+
+            console.group('parlimenActive');
+            console.log('d', d);
+
+            let active = !d3.select(this).classed('active'); // toggle
+
+            d3.select(this).classed('active', active);
+
+            //=====================
+            //  parlimen-content
+            //=====================
+
+            d3.select(this.parentNode)
+                .selectAll('.parlimen-content')
+                .data(d => active ? d.values : [])
+                .join('div').attr('class', 'parlimen-content')
+                .style('display', 'flex')
+                .style('border-top', '1px solid #cccccc80')
+                .style('padding', '6px')
+                .style('font-size', '90%')
+                .call(sel => {
+
+                    sel.selectChildren('content-con')
+                        .data(d => [d])
+                        .join('div')
+                        .attr('class', 'content-con')
+                        .style('display', 'flex')
+                        .call(sel => {
+                            sel.selectChildren('.parti_flag')
+                                .data(d => [d])
+                                .join('img')
+                                .attr('class', 'parti_flag')
+                                .html(d => console.log(d))
+                                .attr('src', d => 'parti_logo/' + d.parti.toLowerCase() + '.png') // dynamic call img source
+                                .style('width', '30px')
+                                .style('height', '20px')
+                                .style('border', '1px solid black')
+                                .style('margin-left', '80px')
+
+                            sel.selectChildren('.nama_calon').data(d => [d])
+                                .join('div').attr('class', 'nama_calon')
+                                .style('flex', '0 0 150px')
+                                .style('padding-left', '12px')
+                                .html(d => d.nama_calon)
+
+                            sel.selectChildren('.jumlah_undian').data(d => [d])
+                                .join('div').attr('class', 'jumlah_undian')
+                                .style('flex', '0 0 18px')
+                                .style('text-align', 'right')
+                                .style('padding-left', '12px')
+                                .html(d => comma(+d.jumlah_undian))
+
+                            sel.selectChildren('.status').data(d => [d])
+                                .join('div').attr('class', 'status')
+                                .style('flex', '0 0 55px')
+                                .style('margin-left', '2px')
+                                .style('padding', '0px 5px')
+                                .style('text-align', 'center')
+                                .style('background-color', function(d){
+                                    if(d.status == 'MENANG') {
+                                        return '#12d700'
+                                    }
+                                    if(d.status == 'HILANG DEPOSIT') {
+                                        return '#b7b9b7'
+                                    }
+                                    if(d.status == 'KALAH') {
+                                        return '#ff4a4a'
+                                    }
+                                })
+                                .html(d => d.status)
+
+                            sel.selectChildren('.status-logo')
+                                .data(d => [d].filter(k=>k.status == 'MENANG'))
+                                .join('div').attr('class', 'status-logo')
+                                .style('flex', '0 0 100px')
+                                .style('width', '10px')
+                                .html('    <div data-v-414873e9="" data-v-4a41061e="" style="width: 30px; height: 30px; overflow: hidden; margin: 0px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150" width="100" height="100" preserveAspectRatio="xMidYMid meet" style="width: 100%; height: 100%; transform: translate3d(0px, 0px, 0px); content-visibility: visible;"><defs><clipPath id="__lottie_element_623"><rect width="150" height="150" x="0" y="0"></rect></clipPath></defs><g clip-path="url(#__lottie_element_623)"><g transform="matrix(0.9996698498725891,0,0,0.9996698498725891,75,75)" opacity="0.1" style="display: block;"><g opacity="1" transform="matrix(1,0,0,1,0,0)"><path fill="rgb(255,255,255)" fill-opacity="1" d=" M0,-75 C41.39250183105469,-75 75,-41.39250183105469 75,0 C75,41.39250183105469 41.39250183105469,75 0,75 C-41.39250183105469,75 -75,41.39250183105469 -75,0 C-75,-41.39250183105469 -41.39250183105469,-75 0,-75z"></path></g></g><g transform="matrix(1,0,0,1,49.5,27.860000610351562)" opacity="1" style="display: block;"><g opacity="1" transform="matrix(1,0,0,1,0,0)"><path stroke-linecap="round" stroke-linejoin="round" fill-opacity="0" stroke="rgb(242,242,247)" stroke-opacity="1" stroke-width="9" d=" M0,41.959999084472656 C0,41.959999084472656 22.40999984741211,64.3499984741211 22.40999984741211,64.3499984741211 C22.40999984741211,64.3499984741211 83.62999725341797,0 83.62999725341797,0"></path></g></g><g transform="matrix(1,0,0,1,49.5,27.860000610351562)" opacity="1" style="display: block;"><g opacity="1" transform="matrix(1,0,0,1,0,0)"><path stroke-linecap="round" stroke-linejoin="round" fill-opacity="0" stroke="rgb(0,52,86)" stroke-opacity="1" stroke-width="10" d=" M0,41.959999084472656 C0,41.959999084472656 22.40999984741211,64.3499984741211 22.40999984741211,64.3499984741211 C22.40999984741211,64.3499984741211 83.62999725341797,0 83.62999725341797,0"></path></g></g><g transform="matrix(1,0,0,1,49.5,27.860000610351562)" opacity="1" style="display: block;"><g opacity="1" transform="matrix(1,0,0,1,0,0)"><path stroke-linecap="round" stroke-linejoin="round" fill-opacity="0" stroke="rgb(0,48,82)" stroke-opacity="1" stroke-width="10" d=" M0,41.959999084472656 C0,41.959999084472656 22.40999984741211,64.3499984741211 22.40999984741211,64.3499984741211 C22.40999984741211,64.3499984741211 83.62999725341797,0 83.62999725341797,0"></path></g></g><g transform="matrix(1,0,0,1,75,75)" opacity="1" style="display: block;"><g opacity="1" transform="matrix(1,0,0,1,0,0)"><path stroke-linecap="round" stroke-linejoin="round" fill-opacity="0" stroke="rgb(242,242,247)" stroke-opacity="1" stroke-width="9" d=" M49.72800064086914,-5.236999988555908 C49.90800094604492,-3.5160000324249268 50,-1.7690000534057617 50,0 C50,27.594999313354492 27.594999313354492,50 0,50 C-27.594999313354492,50 -50,27.594999313354492 -50,0 C-50,-27.594999313354492 -27.594999313354492,-50 0,-50 C0,-50 0,-50 0,-50 C6.864999771118164,-50 13.40999984741211,-48.612998962402344 19.367000579833984,-46.10499954223633"></path></g></g><g transform="matrix(1,0,0,1,75,75)" opacity="1" style="display: block;"><g opacity="1" transform="matrix(1,0,0,1,0,0)"><path stroke-linecap="round" stroke-linejoin="round" fill-opacity="0" stroke="rgb(0,52,86)" stroke-opacity="1" stroke-width="9" d=" M49.72800064086914,-5.236999988555908 C49.90800094604492,-3.5160000324249268 50,-1.7690000534057617 50,0 C50,27.594999313354492 27.594999313354492,50 0,50 C-27.594999313354492,50 -50,27.594999313354492 -50,0 C-50,-27.594999313354492 -27.594999313354492,-50 0,-50 C0,-50 0,-50 0,-50 C6.864999771118164,-50 13.40999984741211,-48.612998962402344 19.367000579833984,-46.10499954223633"></path></g></g><g transform="matrix(1,0,0,1,75,75)" opacity="1" style="display: block;"><g opacity="1" transform="matrix(1,0,0,1,0,0)"><path stroke-linecap="round" stroke-linejoin="round" fill-opacity="0" stroke="rgb(0,48,82)" stroke-opacity="1" stroke-width="10" d=" M49.72800064086914,-5.236999988555908 C49.90800094604492,-3.5160000324249268 50,-1.7690000534057617 50,0 C50,27.594999313354492 27.594999313354492,50 0,50 C-27.594999313354492,50 -50,27.594999313354492 -50,0 C-50,-27.594999313354492 -27.594999313354492,-50 0,-50 C0,-50 0,-50 0,-50 C6.864999771118164,-50 13.40999984741211,-48.612998962402344 19.367000579833984,-46.10499954223633"></path></g></g></g></svg></div>')
+                              
+                        })
+
+                   
+                });
+
+
+
+            console.groupEnd('parlimenActive');
+
+        }
+
+
+
+    </script>
+
+
+</body>
+
+</html>

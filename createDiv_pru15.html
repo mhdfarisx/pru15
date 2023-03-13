@@ -1,0 +1,596 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+  </head>
+  <body>
+
+    <!-- <h2>RAMALAN FROM TWITTER</h2> -->
+    <!-- <div class="div_scorebox" ></div> -->
+    <div class="createDiv"></div>
+
+
+    <style>
+        html, body, svg {
+            font-family: "Helvetica Neue", -apple-system, BlinkMacSystemFont, sans-serif;
+            font-weight: bold;
+
+        }
+        body {
+            margin: 0px;
+            background-color: white;
+        }
+
+        h2 {
+            text-align: center;
+            background-color: rgb(31, 101, 194);
+            color: white;
+            padding: 12px;
+            margin: 0px;
+        }
+
+        .title {
+            background-color: rgb(10, 78, 105);
+            margin-top:10px;
+            padding:25px;
+            font-size:30px;
+            color: white;
+        }
+
+        h2,h3 {
+            text-align: center;
+            background-color: rgb(28, 71, 88);
+            color: white;
+            margin-top: 10px;
+            margin-bottom: 0;
+            border-color: black;
+            font-weight:bold;
+            font-size:50px;
+        }
+
+        h3.title-svg1 {
+            margin:10px;
+            background-color: rgb(35, 50, 58);
+            margin-left:100px;
+            margin-right:100px
+        }
+
+
+         .calon, .piechart {
+            background-color: white;
+            border-radius: 2px;
+            margin:5px 2px;
+        }
+        .label {
+            padding:45px 10px;
+            background-color: white;
+            border-radius: 2px;
+            margin:5px 2px;
+        }
+
+
+
+    </style>
+
+    <script>
+
+const margin = {top: 10, right: 30, bottom: 20, left: 50},
+            width = 460 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
+
+    d3.csv('clean_resultPru15_latest.csv')
+      .then(csv=>{
+
+        fields = csv.columns;
+		dataset = csv;
+        console.log(fields)
+        console.log(dataset)
+
+
+        createDiv(dataset)
+
+
+
+
+  });
+
+
+    function createDiv(data) {
+        console.log('createDiv', data)
+
+        filterValues = data.filter(data => data.status == 'MENANG') // filter data to status == 'MENANG'
+
+        var groupedParlimen = d3.groups(filterValues, d=>d['parlimen']) // groupBy the data by parlimen column
+                            .map(d=>{
+                                return {
+                                    parti   : d[0],
+                                    value	: d[1]
+                                }
+                            });
+
+        console.log('groupedParlimen', groupedParlimen)
+
+        parlimenData = []
+
+        ////////// this is to 'open up' the array from the group data
+        groupedParlimen.forEach((d,i)=>{
+            var parlimen = d.value
+            parlimen.forEach((e,k)=>{
+                parlimenData.push(e)
+            })
+        })
+
+        console.log('parlimenData', parlimenData) // this is the prepared data
+
+        parlimenData.forEach((d,i)=>{
+            if(d['jenis_pekerjaan'] == "") {
+                d['jenis_pekerjaan'] = "Tiada Maklumat"
+            }
+        })
+
+        let newData = [];
+        newData = parlimenData.map((d) => {
+            return {total:d.total, ju:d.jumlah_undian};
+        })
+
+        console.log('newData', newData)
+
+
+        
+
+
+				parlimenData.forEach(d=>{
+					d.total = +d.total;
+					d.jumlah_undian = +d.jumlah_undian;
+
+					d.pieData = [
+						{ parti:d.parti, value: d.jumlah_undian },
+						{ parti:'Lain-lain', value: d.total - d.jumlah_undian},
+					];
+				});
+
+               var group = d3.groups(parlimenData, d=> d.negeri)
+
+               console.log('group', group)
+
+               
+
+                // group.forEach((d,i)=>{
+                //     var parlimen = d.value
+                //     parlimen.forEach((e,k)=>{
+                //         parlimenData.push(e)
+                //     })
+                // })
+
+
+
+
+       console.log('parlimenData', parlimenData) // this is the prepared data
+
+
+        var prevData = 0
+
+
+        d3.select('.createDiv')
+            .selectAll('.div-con')
+            .data(parlimenData)
+            .join('div')
+            .attr('class', 'div-con')
+                .style('display','flex')
+                .style('justify-content','flex-start')
+                .style('padding-top','2px')
+                .style('padding-bottom','2px')
+                .style('border-top','1px solid #cccccc80')
+                .style('background-color', function(d){return colorParti(d)})
+                .style('opacity', 2)
+                .style('padding-left','12px')
+                .style('padding-right','12px')
+                    .call(sel=>{
+                        sel.selectAll('.label')
+                            .data(d=>[d])
+                            .join('div')
+                            .attr('class', 'label')
+                            .style('flex','0 0 100px')
+                                .call(sel=>{
+
+                                    sel.selectAll('.parcode')
+                                        .data(d=>[d])
+                                        .join('div')
+                                        .attr('class', 'parcode')
+                                            .call(sel=>{
+
+                                                sel.selectAll('.prefix')
+                                                    .data(d=>[d])
+                                                    .join('span')
+                                                    .attr('class', 'prefix')
+                                                    .html('P. ' )
+
+                                                sel.selectAll('.parid')
+                                                    .data(d=>[d])
+                                                    .join('span')
+                                                    .attr('class', 'prefix')
+                                                    .style('font-weight',500)
+                                                    .style('font-size', '20px')
+                                                    .html(d=>d.parid)
+                                            })
+
+                                    sel.selectAll('.parlimen')
+                                        .data(d=>[d])
+                                        .join('div')
+                                        .attr('class', 'parlimen')
+                                        .style('font-weight', 400)
+                                        .html(d=>d.parlimen)
+
+                                    sel.selectAll('.negeri')
+                                        .data(d=>[d])
+                                        .join('div')
+                                        .attr('class', 'negeri')
+                                        .style('font-style', 'italic')
+                                        .style('font-size', '90%')
+                                        .html(d=>d.negeri)
+                                })
+
+                        sel.selectAll('.calon')
+                            .data(d=>[d])
+                            .join('div')
+                            .attr('class', 'calon')
+                            .style('flex','1 0 auto')
+                                .call(sel=>{
+
+                                    sel.selectAll('.imgParti')
+                                        .data(d=>[d])
+                                        .join('img')
+                                        .attr('class', 'imgParti')
+                                        .attr('src',d=> imgParti(d))
+                                        .style('max-width','80px')
+                                        .style('max-height','60px')
+                                        .style('border', '2px solid black')
+                                        .style('margin', '10px')
+
+                                    sel.selectAll('.nama-parti')
+                                        .data(d=>[d])
+                                        .join('div')
+                                        .attr('class', 'nama-parti')
+                                        .html(d=> d.parti)
+                                        .style('padding', '10px')
+                                        .style('vertical-align','middle')
+                                        .style('display','inline-block') // position to stay inline
+                                        .style('height','35px')
+                                        .style('font-size','150%')
+                                        .style('line-height','1px')
+                                        .style('padding-top','1px')
+
+
+                                    sel.selectAll('.nama-calon')
+                                        .data(d=>[d])
+                                        .join('div')
+                                        .attr('class', 'nama-calon')
+                                        .style('flex','0 0 120px')
+                                        //.style('margin-left','6px')
+                                        .style('overflow','hidden')
+                                        //.style('white-space','nowrap')
+                                        .style('vertical-align','middle')
+                                        .style('display','inline-block')
+                                        .style('height','30px')
+                                        // .style('font-size','80%')
+                                        .style('line-height','.9em')
+                                        .style('padding-top','6px')
+                                        .style('height','30px')
+                                        .style('display','block')
+                                        .style('padding-left', '10px')
+                                        .html(d=>"NAMA: " + d.nama_calon)
+
+                                    sel.selectAll('.pekerjaan')
+                                        .data(d=>[d])
+                                        .join('div')
+                                        .attr('class', 'pekerjaan')
+                                        .style('flex','0 0 120px')
+                                        //.style('margin-left','6px')
+                                        .style('overflow','hidden')
+                                        //.style('white-space','nowrap')
+                                        .style('font-size','90%')
+                                        .style('height','30px')
+                                        .style('display','block')
+                                        .style('padding-left', '10px')
+                                        .html(d=>"PEKERJAAN: " + d.jenis_pekerjaan.toUpperCase())
+
+                                    sel.selectAll('.nombor-calon')
+                                        .data(d=>[d])
+                                        .join('div')
+                                        .attr('class', 'nombor-calon')
+                                        .style('flex','0 0 120px')
+                                        //.style('margin-left','6px')
+                                        .style('overflow','hidden')
+                                        //.style('white-space','nowrap')
+                                        .style('font-size','90%')
+                                        .style('height','30px')
+                                        .style('display','block')
+                                        .style('padding-left', '10px')
+                                        .html(d=>"NO. CALON: " + d.no_calon)
+
+                                    sel.selectAll('.status')
+                                        .data(d=>[d])
+                                        .join('div')
+                                        .attr('class', 'status')
+                                        .style('flex','0 0 120px')
+                                        //.style('margin-left','6px')
+                                        .style('overflow','hidden')
+                                        //.style('white-space','nowrap')
+                                        .style('font-size','90%')
+                                        .style('height','30px')
+                                        .style('display','block')
+                                        .style('padding-left', '10px')
+                                        .html(d=>"JUMLAH UNDIAN: " + d.jumlah_undian)
+
+
+
+
+
+                                })
+
+
+											 //// maybe can put piechart for how many peole voted the candidate
+											 // const pieData = d3.pie().value((d) => (d.value))(newData)
+//											 const pieData = d3.pie().value((d) => (d.value))
+
+//											 console.log('piedata', pieData)
+
+												let pie = d3.pie().value((d) => (d.value));
+
+												let size = 100;
+
+												let arc = d3.arc()
+							                     .innerRadius(30)
+							                     .outerRadius((d)=>{
+							                         //return (d.value/size) *  100 +  200;
+							                         return size/10
+							                     })
+							                     .cornerRadius(2);
+
+
+                        sel.selectAll('.pie-chart-container')
+                            .data(d=>[d])
+                            .join('div')
+                            .attr('class', 'pie-chart-container')
+                            .style('flex','1 0 auto')
+                                .call(sel=>{
+
+
+
+//																 var t = d3.transpose(newData)
+//																 console.log('t', t)
+
+																 sel.selectAll('.piechart') // this is for the whole piechart
+																     .data(d=>[d])
+																     .join('svg')
+																     .attr('class', 'piechart')
+																     //.style('flex','1 0 auto')
+//																     .attr("width", size)
+//																     .attr("height", size)
+																	.attr('viewBox','0 0 100 100')
+																         .join("g")
+																             .call(sel => {
+
+																                 sel.selectAll('piechart-slice') // this for each slice of piechart
+																                     .data(d=>{
+
+																                     	let p = pie(d.pieData);
+																                     	console.log('p', p);
+
+																                     	return p;
+
+																                    })
+																                     .join('path')
+																                     .attr('class', 'piechart-slice]')
+																                     .attr("transform", 'translate('+ [size/2,size/2] +')')
+																                     .attr('d', d=>{
+
+																	                     	let k = arc(d);
+
+																		                    console.log('k', k);
+
+																		                    return k;
+
+
+																                     })
+//																                     //.attr('fill',(d,i)=>d.data.parti=='Lain-lain' ? 'red' : 'orange')
+//																                     .attr('fill',(d,i)=>{
+//
+//																                     	return {
+//																	                     	PN:'black',
+//																	                     	BN:'blue',
+//																	                     	PH:'red',
+//																	                     	'Lain-Lain':'gray',
+//																	                    }[d.data.parti] || 'orange'
+//
+//																	                   })
+																                     .attr('fill',(d,i)=>{
+
+																                     	let color = {
+                                                                                            PH:'#D7292F',
+                                                                                            PAS:'#6CB332',
+																	                     	PN:'#043253',
+																	                     	BN:'#031A93',
+																	                     	GPS:'#1F2C45',
+                                                                                            GRS:'#6285a8',
+                                                                                            MUDA: 'black',
+                                                                                            DAP:'#E30911',
+                                                                                            WARISAN:'#5BC5F0',
+                                                                                            PBM:'#323467',
+                                                                                            KDM:'#EB7389',
+                                                                                            BEBAS:'#993300'
+
+																	                    };
+
+																                     	return color[d.data.parti] || 'gray'
+
+																	                   })
+																                     .attr('stroke','#000')
+
+																             })
+
+                                });
+
+
+
+
+
+                    // sel.selectAll('.barchart-con')
+                    //     .data(d=>[d])
+                    //     .join('rect')
+                    //     .attr('class', 'barchart-con')
+                    //     .attr("width", 1000)
+                    //             .attr("height", 1000)
+                    //             .selectAll('g')
+                    //                 .data(d=>[d])
+                    //                 .join('g')
+                    //                 .attr("transform", d=>"translate(" + 500 + "," + 42 + ")")
+                    //                     .call(sel=> {
+
+                    //                         sel.selectAll('.rect')
+                    //                             .data(d=>[d])
+                    //                             .join('rect')
+                    //                                 .attr('class', 'rect')
+                    //                                 .attr("transform", "translate(" + 20 + "," + 10 + ")")
+                    //                                 //.attr('y', d=>d.y*42)
+                    //                                 .attr('x',  d=> position(d)*4)
+                    //                                 .attr('fill', function(d){ 'black' })
+                    //                                 .attr('height', function(d,i){
+                    //                                     prevData = prevData + d.value
+                    //                                     console.log(prevData)
+                    //                                     return d.width
+                    //                                 })
+                    //                                 .style("opacity", 0.8)
+                    //                                 .transition()
+                    //                                 .delay(function (d,i){ return i * 1000;})
+                    //                                 .duration(1000)
+                    //                                 .attr('width', 5)
+                    //                     })
+
+
+
+
+                    // //// maybe can put piechart for how many peole voted the candidate
+                    // const pieData = d3. pie().value((d) => (d.value))(newData)
+                    // console.log('piedata', pieData)
+
+                    // var t = d3.transpose(newData)
+                    // console.log('t', t)
+
+                        // sel.selectAll('.piechart')
+                        //     .data([{pieData}])
+                        //     .join('svg')
+                        //     .attr('class', 'piechart')
+                        //     .style('flex','1 0 auto')
+                        //     .attr("width", 1000)
+                        //     .attr("height", 1000)
+                        //         .join("g")
+                        //             .call(sel => {
+
+                        //                 sel.selectAll('piechart-data')
+                        //                     .data(d=>d.data)
+                        //                     .join('path')
+                        //                     .attr('class', 'piechart-data]')
+                        //                     .attr("transform", `translate(${1000/2}, ${1000/2})`)
+                        //                     .attr('d', d3.arc()
+                        //                     .innerRadius(70)
+                        //                     .outerRadius((d)=>{
+                        //                         return (d.value/1000) *  100 +  200;
+                        //                     })
+                        //                     .cornerRadius(2)
+                        //                     )
+                        //             })
+
+                    })
+
+
+    }
+
+
+    function colorParti(d) {
+            if(d.parti == 'PN'){
+                return '#043253'
+            }
+            if(d.parti == 'PH'){
+                return '#D7292F'
+            }
+            if(d.parti == 'MUDA'){
+                return 'black'
+            }
+            if(d.parti == 'BN'){
+                return '#031A93'
+            }
+            if(d.parti == 'PAS'){
+                return '#6CB332'
+            }
+            if(d.parti == 'GPS'){
+                return '#1F2C45'
+            }
+            if(d.parti == 'DAP'){
+                return '#E30911'
+            }
+            if(d.parti == 'GRS'){
+                return '#6285a8'
+            }
+            if(d.parti == 'BEBAS'){
+                return '#993300'
+            }
+            if(d.parti == 'WARISAN'){
+                return '#5BC5F0'
+            }
+            if(d.parti == 'PBM'){
+                return '#323467'
+            }
+            if(d.parti == 'KDM'){
+                return '#EB7389'
+            }
+        }
+
+    function imgParti (d) {
+
+       if(d.parti == 'PH') {
+            return 'parti_logo/ph.png';
+       }
+       if(d.parti == 'PN') {
+        return 'parti_logo/pn.png';
+       }
+       if(d.parti == 'BN') {
+        return 'parti_logo/bn.png';
+       }
+       if(d.parti == 'GPS') {
+        return 'parti_logo/gps.png';
+       }
+       if(d.parti == 'PAS') {
+        return 'parti_logo/pas.png';
+       }
+       if(d.parti == 'GRS') {
+        return 'parti_logo/grs.png';
+       }
+       if(d.parti == 'DAP') {
+        return 'parti_logo/dap.png';
+       }
+       if(d.parti == 'WARISAN') {
+        return 'parti_logo/warisan.png';
+       }
+       if(d.parti == 'BEBAS') {
+        return 'parti_logo/bebas.png';
+       }
+       if(d.parti == 'MUDA') {
+        return 'parti_logo/muda.png';
+       }
+       if(d.parti == 'KDM') {
+        return 'parti_logo/kdm.png';
+       }
+       if(d.parti == 'PBM') {
+        return 'parti_logo/pbm.png';
+       }
+
+    }
+
+
+    </script>
+  </body>
+</html>
+

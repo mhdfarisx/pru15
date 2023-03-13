@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="summary_report" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="0" uuid="fcec7ff8-b3ad-4287-84fd-5fcfd367343b">
+	<property name="ireport.zoom" value="1.9487171000000014"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="parid" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT stateid, parid, dunid, tahun, negeri, parlimen_b, dun_b, kos,
+IF(source = 'peruntukan khas',1,0) bil_pk,
+IF(source = 'pmr',1,0) bil_pmr,
+SUM(IF(source = 'peruntukan khas',kos,0)) pk,
+SUM(IF(source = 'pmr',kos,0)) pmr
+FROM peruntukan_farithzman
+WHERE stateid IS NOT NULL and projek is not null
+GROUP BY stateid, parid, dunid]]>
+	</queryString>
+	<field name="stateid" class="java.lang.Integer">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="parid" class="java.lang.Integer">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="dunid" class="java.lang.Integer">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="tahun" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="negeri" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="parlimen_b" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="dun_b" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="kos" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="bil_pk" class="java.lang.Integer"/>
+	<field name="bil_pmr" class="java.lang.Integer"/>
+	<field name="pk" class="java.lang.Double"/>
+	<field name="pmr" class="java.lang.Double"/>
+	<group name="GROUP_stateid" isStartNewPage="true">
+		<groupExpression><![CDATA[$F{stateid}]]></groupExpression>
+		<groupHeader>
+			<band height="75">
+				<textField>
+					<reportElement mode="Opaque" x="70" y="0" width="485" height="35" forecolor="#FFFFFF" backcolor="#404040" uuid="3fe74c5e-5bfb-45d7-aedd-571d99b52126"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="16" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{negeri}]]></textFieldExpression>
+				</textField>
+				<image>
+					<reportElement x="0" y="0" width="70" height="35" uuid="9d43ef56-e130-4e1e-8a19-f61d5bc0716f"/>
+					<imageExpression><![CDATA["C:\\Users\\mhdfa\\Documents\\personal\\flag\\" + $F{stateid} + ".png"]]></imageExpression>
+				</image>
+				<rectangle>
+					<reportElement mode="Transparent" x="0" y="0" width="555" height="35" uuid="865074c7-62a4-4b2f-b82f-61aa5df58ada"/>
+				</rectangle>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="PAR_B_GROUP">
+		<groupExpression><![CDATA[$F{parid}]]></groupExpression>
+		<groupHeader>
+			<band height="69">
+				<rectangle>
+					<reportElement mode="Opaque" x="11" y="30" width="544" height="24" backcolor="#FFF8DC" uuid="d4393f31-4616-4559-900a-207feebe5981">
+						<printWhenExpression><![CDATA[$F{dunid}%2==0?true:false]]></printWhenExpression>
+					</reportElement>
+					<graphicElement>
+						<pen lineWidth="0.0" lineStyle="Solid"/>
+					</graphicElement>
+				</rectangle>
+				<rectangle>
+					<reportElement x="0" y="0" width="555" height="20" backcolor="#F5DEB3" uuid="40cd2fb7-ab0e-4009-a4c0-391a13714ee9"/>
+					<graphicElement>
+						<pen lineWidth="0.0"/>
+					</graphicElement>
+				</rectangle>
+				<rectangle>
+					<reportElement x="0" y="44" width="555" height="25" backcolor="#F5F5DC" uuid="37c1f9c1-9506-4496-8d5f-611042516ccf">
+						<printWhenExpression><![CDATA[$F{dunid}%2==1?true:false]]></printWhenExpression>
+					</reportElement>
+					<graphicElement>
+						<pen lineWidth="0.0" lineStyle="Solid"/>
+					</graphicElement>
+				</rectangle>
+				<textField>
+					<reportElement x="0" y="0" width="155" height="20" uuid="dbf07493-4a9b-45bc-84d3-6543f15a14a6"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["P" + $F{parid} + " " + $F{parlimen_b}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="group_dun">
+		<groupExpression><![CDATA[$F{dunid}]]></groupExpression>
+		<groupHeader>
+			<band height="26">
+				<staticText>
+					<reportElement mode="Transparent" x="469" y="0" width="32" height="24" backcolor="#8FBC8F" uuid="6a38e5a5-4d17-44fa-b809-cd9caa8e076d"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<text><![CDATA[RM]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="25" y="4" width="100" height="20" uuid="190d73e7-9e18-457e-ab89-7172b5e347fb"/>
+					<textFieldExpression><![CDATA[$F{dunid}]]></textFieldExpression>
+				</textField>
+				<rectangle>
+					<reportElement mode="Transparent" x="302" y="4" width="87" height="20" uuid="eebf355e-9914-4be5-a7d3-47df8f619cf2"/>
+				</rectangle>
+			</band>
+		</groupHeader>
+	</group>
+	<pageHeader>
+		<band height="53" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="17" width="555" height="35" uuid="a7714e49-b7f4-4dba-b0e1-dfc5fd3bd402"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="SansSerif" size="24"/>
+				</textElement>
+				<text><![CDATA[REPORT SUMMARY]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement mode="Transparent" x="0" y="17" width="555" height="35" uuid="43c0bc46-2d62-4acf-9685-ee0975040420"/>
+			</rectangle>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="40">
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="155" height="20" backcolor="#C0C0C0" uuid="3377c801-211a-406f-b92c-aa20079fdc39"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom"/>
+				<text><![CDATA[NAMA PARLIMEN /]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="266" y="20" width="58" height="10" uuid="be0317d1-4b0f-4e73-b0fb-0e39974fe4fa"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTAL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="155" y="20" width="55" height="19" uuid="da4246d5-6b69-4adf-a6dc-829d62b4087a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[KHAS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="19" width="155" height="20" backcolor="#C0C0C0" uuid="c854feb8-39ab-438c-b482-d9e55941d505"/>
+				<textElement textAlignment="Center" verticalAlignment="Top"/>
+				<text><![CDATA[NAMA DUN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="155" y="0" width="400" height="19" backcolor="#C0C0C0" uuid="62f754c8-7581-486b-ab0f-50f74edf8c6c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[JUMLAH]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement mode="Transparent" x="155" y="0" width="400" height="19" uuid="09ec1491-f1bb-46f7-8f91-74b4a7ce8b1c"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="211" y="20" width="55" height="19" uuid="893aab7d-87b6-46af-b054-8fba4e577506"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PMR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="266" y="30" width="58" height="10" uuid="107f1022-af59-4bfd-a4f4-60e57c57da51"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="6" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PROJEK]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<pageFooter>
+		<band height="37">
+			<textField>
+				<reportElement x="425" y="17" width="80" height="20" uuid="1096c2ea-6354-4fc6-b92d-3563adb72adb"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="505" y="17" width="40" height="20" uuid="715a2669-418f-4971-baed-847129898338"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement mode="Transparent" x="266" y="17" width="86" height="20" uuid="fb282aad-a8ed-482d-bcc7-3c327e9d728b"/>
+				<graphicElement>
+					<pen lineStyle="Double"/>
+				</graphicElement>
+			</rectangle>
+			<rectangle>
+				<reportElement mode="Transparent" x="70" y="17" width="177" height="20" uuid="28f6d6a5-19e3-4d85-9a74-38bfcbf83f72"/>
+			</rectangle>
+		</band>
+	</pageFooter>
+</jasperReport>
