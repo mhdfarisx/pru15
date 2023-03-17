@@ -26,52 +26,45 @@ function map() {
         features = parlimen.features
 
         var parlimenW = dataP.filter(d => d.status == "MENANG")
-        // 1 parlimen is missing padang serai
 
-//         parlimenW.forEach((k, i) => {
 
-//             if (k.parti == "PAS") {
-//                 k.parti = "PN"
-//             }
-//             if (k.parti == "DAP") {
-//                 k.parti = "PH"
-//             }
-//             if (k.parti == "MUDA") {
-//                 k.parti = "PH"
-//             }
-//         })
+        parlimenW.forEach((d, l) => {
 
-        parlimenW.forEach((k, l) => {
-
-            if (k.parti == "GPS") {
-                k.color = "rgb(177, 72, 210)"
+            if(d.parti == 'PN'){
+            d.color = '#043253'
             }
-            if (k.parti == "PN") {
-                k.color = "rgb(0, 49, 82)"
+            if(d.parti == 'PH'){
+                 d.color = '#D7292F'
             }
-            if (k.parti == "PH") {
-                k.color = "rgb(216, 35, 43)"
+            if(d.parti == 'MUDA'){
+                 d.color = 'black'
             }
-            if (k.parti == "BN") {
-                k.color = "rgb(0, 0, 128)"
+            if(d.parti == 'BN'){
+                 d.color = '#031A93'
             }
-            if (k.parti == "MUDA") {
-                k.color = "#252525"
+            if(d.parti == 'PAS'){
+                 d.color = '#6CB332'
             }
-            if (k.parti == "BEBAS") {
-                k.color = "rgb(255, 63, 171)"
+            if(d.parti == 'GPS'){
+                 d.color = '#1F2C45'
             }
-            if (k.parti == "GRS") {
-                k.color = "rgb(0, 146, 233)"
+            if(d.parti == 'DAP'){
+                 d.color = '#E30911'
             }
-            if (k.parti == "WARISAN") {
-                k.color = "rgb(95, 170, 195)"
+            if(d.parti == 'GRS'){
+                 d.color = '#6285a8'
             }
-            if (k.parti == "KDM") {
-                k.color = "rgb(255,0,0)"
+            if(d.parti == 'BEBAS'){
+                 d.color = '#993300'
             }
-            if (k.parti == "PBM") {
-                k.color = "rgb(17, 17, 57)"
+            if(d.parti == 'WARISAN'){
+                 d.color = '#5BC5F0'
+            }
+            if(d.parti == 'PBM'){
+                 d.color = '#323467'
+            }
+            if(d.parti == 'KDM'){
+                 d.color = '#EB7389'
             }
 
         })
