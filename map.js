@@ -28,18 +28,18 @@ function map() {
         var parlimenW = dataP.filter(d => d.status == "MENANG")
         // 1 parlimen is missing padang serai
 
-        parlimenW.forEach((k, i) => {
+//         parlimenW.forEach((k, i) => {
 
-            if (k.parti == "PAS") {
-                k.parti = "PN"
-            }
-            if (k.parti == "DAP") {
-                k.parti = "PH"
-            }
-            if (k.parti == "MUDA") {
-                k.parti = "PH"
-            }
-        })
+//             if (k.parti == "PAS") {
+//                 k.parti = "PN"
+//             }
+//             if (k.parti == "DAP") {
+//                 k.parti = "PH"
+//             }
+//             if (k.parti == "MUDA") {
+//                 k.parti = "PH"
+//             }
+//         })
 
         parlimenW.forEach((k, l) => {
 
